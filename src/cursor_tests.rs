@@ -147,3 +147,96 @@ async fn invalid_and_exhausted_continuations_refuse_without_eviction() {
         Err(CursorError::ResetRequired)
     ));
 }
+#[tokio::test]
+async fn nonzero_token_collision_refuses_without_overwrite() {
+    let (mut cursors, _) = setup();
+    let first = cursors
+        .issue(context(), "first".into(), Deadline::new(200).unwrap())
+        .await
+        .unwrap();
+    assert_eq!(first.0, 1u128.to_be_bytes());
+    cursors.tokens = Sequence(AtomicU64::new(1));
+    assert!(matches!(
+        cursors
+            .issue(context(), "second".into(), Deadline::new(300).unwrap())
+            .await,
+        Err(CursorError::Storage(cmmr::Error::Conflict))
+    ));
+    let kept = cursors.resume(&first, &context()).await.unwrap();
+    assert_eq!(kept.after(), "first");
+    assert_eq!(kept.deadline().unix_ms(), 200);
+}
+#[tokio::test]
+async fn deleting_generation_a_preserves_generation_b_without_renewal() {
+    let (cursors, time) = setup();
+    let mut context_a = context();
+    context_a.generation = "generationa".into();
+    let mut context_b = context();
+    context_b.generation = "generationb".into();
+    let a_first = cursors
+        .issue(
+            context_a.clone(),
+            "a-first".into(),
+            Deadline::new(400).unwrap(),
+        )
+        .await
+        .unwrap();
+    let a_second = cursors
+        .issue(
+            context_a.clone(),
+            "a-second".into(),
+            Deadline::new(400).unwrap(),
+        )
+        .await
+        .unwrap();
+    let b_first = cursors
+        .issue(
+            context_b.clone(),
+            "b-first".into(),
+            Deadline::new(300).unwrap(),
+        )
+        .await
+        .unwrap();
+    let b_second = cursors
+        .issue(
+            context_b.clone(),
+            "b-second".into(),
+            Deadline::new(300).unwrap(),
+        )
+        .await
+        .unwrap();
+    cursors
+        .store
+        .delete_generation("generationa")
+        .await
+        .unwrap();
+    assert!(matches!(
+        cursors.resume(&a_first, &context_a).await,
+        Err(CursorError::ResetRequired)
+    ));
+    assert!(matches!(
+        cursors.resume(&a_second, &context_a).await,
+        Err(CursorError::ResetRequired)
+    ));
+    for _ in 0..3 {
+        let kept = cursors.resume(&b_first, &context_b).await.unwrap();
+        assert_eq!(kept.after(), "b-first");
+        assert_eq!(kept.deadline().unix_ms(), 300);
+    }
+    time.0.store(250, Ordering::SeqCst);
+    let kept = cursors.resume(&b_first, &context_b).await.unwrap();
+    assert_eq!(kept.after(), "b-first");
+    assert_eq!(kept.deadline().unix_ms(), 300);
+    let kept = cursors.resume(&b_second, &context_b).await.unwrap();
+    assert_eq!(kept.after(), "b-second");
+    assert_eq!(kept.deadline().unix_ms(), 300);
+    time.0.store(300, Ordering::SeqCst);
+    assert!(matches!(
+        cursors.resume(&b_first, &context_b).await,
+        Err(CursorError::ResetRequired)
+    ));
+    assert!(matches!(
+        cursors.resume(&b_second, &context_b).await,
+        Err(CursorError::ResetRequired)
+    ));
+}
