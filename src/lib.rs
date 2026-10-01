@@ -142,7 +142,10 @@ fn index_key(schema: &Schema, field: &str, normalized: Value) -> IndexKey {
     ])
     .to_string();
     let digest = Sha256::digest(bytes.as_bytes());
-    IndexKey(format!("clkp_{digest:x}"))
+    IndexKey(format!(
+        "clkp_{}",
+        data_encoding::HEXLOWER.encode(digest.as_ref())
+    ))
 }
 
 #[cfg(test)]

@@ -209,3 +209,12 @@ fn community_and_schema_scope_cannot_cross_index_keys() {
     assert!(a.indexes().is_disjoint(b.indexes()));
     assert!(!a.reciprocal_match(&b));
 }
+
+#[test]
+fn index_encoding_remains_byte_identical_across_digest_versions() {
+    // Independently computed with Python hashlib over the exact JSON array.
+    assert_eq!(
+        index_key(&schema(), "boolean", json!(true)).as_str(),
+        "clkp_27d03d2765068a75e47ba3623e74378b3c99d6f09b73ad33b570bcb08f10cf45"
+    );
+}
