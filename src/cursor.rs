@@ -127,7 +127,7 @@ impl<S: Store, R: cswb::Tokens> Cursors<S, R> {
 }
 
 fn key(cursor: &Cursor) -> String {
-    let token: String = cursor.0.iter().map(|b| format!("{b:02x}")).collect();
+    let token = data_encoding::HEXLOWER.encode(&cursor.0);
     format!("lkp_{token}")
 }
 

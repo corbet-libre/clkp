@@ -2,6 +2,7 @@
 name = "clkp"
 version = "0.1.0"
 edition = "2024"
+publish = false
 description = "Lookup for the volatile forum"
 repository = "https://github.com/corbet-foss/clkp"
 license = "LGPL-3.0-only WITH LGPL-3.0-linking-exception"

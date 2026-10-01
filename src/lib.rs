@@ -82,7 +82,7 @@ impl Projection {
                         .collect();
                     clauses.push(clause);
                 }
-                Rule::NumberRange { .. } | Rule::Block { .. } => {}
+                Rule::NumberRange { .. } | Rule::DistanceRange { .. } | Rule::Block { .. } => {}
             }
         }
         Ok(Self {

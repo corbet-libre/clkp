@@ -218,3 +218,55 @@ fn index_encoding_remains_byte_identical_across_digest_versions() {
         "clkp_27d03d2765068a75e47ba3623e74378b3c99d6f09b73ad33b570bcb08f10cf45"
     );
 }
+
+#[test]
+fn distance_candidates_equal_exhaustive_guard_and_fixed_equatorial_oracle() {
+    // WGS84 equatorial fixture separations are 0, about1113.2m and2226.4m.
+    // Explicit expected bands avoid implementing another distance calculation.
+    let bands = [
+        (0, 1200, [true, true, false]),
+        (1, 1200, [false, true, false]),
+        (1500, 2500, [false, false, true]),
+        (0, 2500, [true, true, true]),
+    ];
+    let categories = [[0, 1, 2], [1, 0, 1], [2, 1, 0]];
+    let mut fixtures = Vec::new();
+    for (point, longitude) in [0.0, 0.01, 0.02].into_iter().enumerate() {
+        for (lower, upper, allowed) in bands {
+            let id = format!("point{point}-{lower}-{upper}");
+            let value = profile(json!({"location":{"latitude":0,"longitude":longitude}}));
+            let rules = vec![Rule::DistanceRange {
+                field: "location".into(),
+                min_meters: lower.to_string(),
+                max_meters: upper.to_string(),
+            }];
+            fixtures.push((point, allowed, id, value, rules));
+        }
+    }
+    let projections: Vec<_> = fixtures
+        .iter()
+        .map(|(_, _, id, value, rules)| prepare(id, value, rules))
+        .collect();
+    for (a, (point_a, allow_a, id_a, value_a, rules_a)) in fixtures.iter().enumerate() {
+        let owner = Participant::new(id_a, value_a, &schema(), rules_a).unwrap();
+        let mut expected = Vec::new();
+        let mut exhaustive = Vec::new();
+        let mut indexed = Vec::new();
+        for (b, (point_b, allow_b, id_b, value_b, rules_b)) in fixtures.iter().enumerate() {
+            let category = categories[*point_a][*point_b];
+            if a != b && allow_a[category] && allow_b[category] {
+                expected.push(b);
+            }
+            let peer = Participant::new(id_b, value_b, &schema(), rules_b).unwrap();
+            if cgrd::matches(&owner, &peer).is_match() {
+                exhaustive.push(b);
+            }
+            if projections[a].reciprocal_match(&projections[b]) {
+                indexed.push(b);
+            }
+        }
+        assert_eq!(exhaustive, expected);
+        assert_eq!(indexed, expected);
+        assert!(!projections[a].reciprocal_match(&prepare("absent", &profile(json!({})), &[])));
+    }
+}
