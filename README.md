@@ -4,9 +4,36 @@ Implementation in progress. Admission is unavailable until current trust, public
 
 ## Scope
 
-Derive typed indexes and bounded reciprocal match pages from current Switchboard entries. Guard owns rule evaluation; Lookup owns neither identity nor a second listing.
+### Purpose
 
-Return bounded reciprocal matches only; preserve exact values and delegate all rule semantics, including distance, to Guard. Expired/revoked/withdrawn entries are ineligible before cleanup. Guard supplies distance evaluation and Schema supplies read-only validation types. Current live authority and ciphertext disclosure integration remain unavailable; no ranking, match tokens, full-roster delivery or profile keys.
+clkp finds candidates for a member efficiently and keeps the live match list current over a RAM-only table of typed attributes.
+
+### Owns
+
+- Derived typed indexes over committed Switchboard entries and candidate selection, with reciprocal two-way evaluation through cgrd.
+- Returns only two-way matches.
+- A paged and incremental match feed that reports arrivals and departures.
+- Serving a stored ciphertext only to a currently authorized reader under the current pair check.
+- Index storage through cvtl; the device-side counterpart is csrh Search, which holds the member cursor and local recheck.
+
+### Never
+
+- Holds no second listing and never sends the full match list to a device.
+- Reveals no blocked owners, evaluates no private fields, ranks nothing by recorded activity, and issues no match tokens.
+- Coarsens no values: exact numbers only, with ranges only in rules.
+- Relays no profile keys and performs no key exchange.
+- Keeps no search history and no contact graph.
+
+### States
+
+Empty to Indexed; subscriptions move from an initial page to following a cursor, requiring a reset on gaps or schema changes, then closed. Expired, withdrawn, departed, or revoked entries are ineligible before index cleanup.
+
+### Test obligations
+
+- Real two-way matches over exact numbers, ranges, choices, and blocks; index candidates equal independent exhaustive evaluation.
+- Page bounds and cursors bind requester, query, epoch, and generation; additions, updates, removals, and gaps give deterministic results.
+- Departure, block, or revocation between page and ciphertext read refuses access, and a blocked member never sees the blocker.
+- Large forums keep pages bounded so a device never receives the whole list.
 
 ## Dependencies and validation
 
