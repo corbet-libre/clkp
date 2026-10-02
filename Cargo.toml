@@ -18,4 +18,13 @@ cswb = { git = "https://github.com/corbet-foss/cswb", branch = "main" }
 serde = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
+cnvl = { git = "https://github.com/corbet-foss/cnvl", branch = "main" }
 tokio = { version = "1", features = ["rt", "macros"] }
+cpfl = { git = "https://github.com/corbet-foss/cpfl", branch = "main" }
+cchr = { git = "https://github.com/corbet-foss/cchr", branch = "main" }
+ckmg = { git = "https://github.com/corbet-foss/ckmg", branch = "main" }
+cwst = { git = "https://github.com/corbet-foss/cwst", branch = "main" }
+csgn = { git = "https://github.com/corbet-foss/csgn", branch = "main", default-features = false, features = ["volatile-signer"] }
+cvlk = { git = "https://github.com/corbet-foss/cvlk", branch = "main" }
+ed25519-dalek = { version = "3", default-features = false, features = ["fast"] }
+redis = { version = "1", default-features = false, features = ["tokio-comp", "script"] }
