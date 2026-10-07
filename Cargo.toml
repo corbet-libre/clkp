@@ -4,17 +4,17 @@ version = "0.1.0"
 edition = "2024"
 publish = false
 description = "Lookup for the volatile forum"
-repository = "https://github.com/corbet-foss/clkp"
+repository = "https://git.corbet.ch/corbet-foss/clkp"
 license = "LGPL-3.0-only WITH LGPL-3.0-linking-exception"
 
 [dependencies]
-cgrd = { git = "https://github.com/corbet-foss/cgrd", branch = "main", default-features = false }
-cshm = { git = "https://github.com/corbet-foss/cshm", branch = "main" }
+cgrd = { git = "https://git.corbet.ch/corbet-foss/cgrd", branch = "main", default-features = false }
+cshm = { git = "https://git.corbet.ch/corbet-foss/cshm", branch = "main" }
 serde_json = "1"
 sha2 = "0.11"
 data-encoding = "2"
-cmmr = { git = "https://github.com/corbet-foss/cmmr", branch = "main" }
-cswb = { git = "https://github.com/corbet-foss/cswb", branch = "main" }
+cmmr = { git = "https://git.corbet.ch/corbet-foss/cmmr", branch = "main" }
+cswb = { git = "https://git.corbet.ch/corbet-foss/cswb", branch = "main" }
 serde = { version = "1", features = ["derive"] }
 
 [dev-dependencies]
