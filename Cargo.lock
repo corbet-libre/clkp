@@ -155,7 +155,7 @@ checksum = "f079e83a288787bcd14a6aea84cee5c87a67c5a3e660c30f557a3d24761b3527"
 [[package]]
 name = "cgrd"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/cgrd?branch=main#bdfbbcfc0e83ea4922a061e10f6efa7b6a0657a4"
+source = "git+https://git.corbet.ch/corbet-foss/cgrd?branch=main#518e6044a8c6bb487b5e040fd28e184135f0ed46"
 dependencies = [
  "bigdecimal",
  "cpns",
@@ -217,7 +217,7 @@ dependencies = [
 [[package]]
 name = "cmmr"
 version = "0.1.0"
-source = "git+https://git.corbet.ch/corbet-foss/cmmr?branch=main#b0fcb6897cbecab15413c3a4891edeba863dc5a3"
+source = "git+https://git.corbet.ch/corbet-foss/cmmr?branch=main#1bdfa957fa92d3f1c23f011d0a13237332421ae0"
 dependencies = [
  "serde",
 ]
@@ -241,7 +241,7 @@ dependencies = [
 [[package]]
 name = "cpns"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/cpns?branch=main#7db9753a30abb4b3b2f391c1e8f354a3146a6a58"
+source = "git+https://git.corbet.ch/corbet-foss/cpns?branch=main#142908fd9dc33f0007c806475ef148efdabc1b4f"
 dependencies = [
  "getrandom 0.4.3",
  "sha2",
@@ -261,7 +261,7 @@ dependencies = [
 [[package]]
 name = "crbk"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/crbk?branch=main#d35cce9df8a976b41fcbd7c3eed546fc429938ad"
+source = "git+https://git.corbet.ch/corbet-foss/crbk?branch=main#e783e8a2766bbd72b70c09cd2fb22983900a1987"
 dependencies = [
  "serde",
  "serde_json",
@@ -286,7 +286,7 @@ dependencies = [
 [[package]]
 name = "csgn"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/csgn?branch=main#cce187a51f6e74cae82a173cf77b78c52426326c"
+source = "git+https://git.corbet.ch/corbet-foss/csgn?branch=main#9d5a57b655a7a7baa13a1cbab6c4068b186a7efd"
 dependencies = [
  "ciborium-ll",
  "coset",
@@ -298,7 +298,7 @@ dependencies = [
 [[package]]
 name = "cshm"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/cshm?branch=main#4e15101eecc9d4783a646b53c9cc57d7ecf22073"
+source = "git+https://git.corbet.ch/corbet-foss/cshm?branch=main#36e2b847d7bb4bc06a4434ed9ad413c954ed0ab4"
 dependencies = [
  "bigdecimal",
  "jsonschema",
@@ -310,7 +310,7 @@ dependencies = [
 [[package]]
 name = "cswb"
 version = "0.1.0"
-source = "git+https://git.corbet.ch/corbet-foss/cswb?branch=main#2f511b5df10938bf07aa97c6c7607a3db933e763"
+source = "git+https://git.corbet.ch/corbet-foss/cswb?branch=main#b798a4abcf900784673094dca1e3f23e5b7a66b2"
 dependencies = [
  "cmmr",
  "data-encoding",
