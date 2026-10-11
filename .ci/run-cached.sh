@@ -65,6 +65,9 @@ mkdir -p "$ARTIFACT_ROOT"
 export SOURCE_SHA256="$(git archive --format=tar HEAD | sha256sum | cut -d ' ' -f 1)"
 export CCID_SOURCE_REVISION="$CI_COMMIT_SHA"
 "$CCID_BIN" render --repo "$PWD" --check
+if [ "$CHECKS" = "resolve-dependencies" ]; then
+  exec "$CCID_BIN" check --repo "$PWD" --check "$CHECKS"
+fi
 proto --version
 moon --version
 rustc -vV
@@ -72,9 +75,6 @@ cargo --version
 python3 --version
 rustup run nightly rustc -vV
 rustup run nightly cargo llvm-cov --version
-if [ "$CHECKS" = "resolve-dependencies" ]; then
-  exec "$CCID_BIN" check --repo "$PWD" --check "$CHECKS"
-fi
 "$CCID_BIN" cached --repo "$PWD" --check verify
 test -s ".ccid/results/verify.jsonl"
 "$CCID_BIN" check --repo "$PWD" --check advisories
