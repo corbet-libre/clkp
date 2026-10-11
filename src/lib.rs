@@ -6,7 +6,8 @@ mod cursor;
 mod lookup;
 pub use cursor::*;
 pub use lookup::{
-    Delta, Lookup, LookupError, LookupLimits, Match, Matches, PageRequest, WatchRequest,
+    AssociatedEvidence, CiphertextRequest, Delta, Lookup, LookupError, LookupLimits, Match,
+    Matches, PageRequest, WatchRequest,
 };
 
 use cgrd::{Participant, Rule, RuleError};

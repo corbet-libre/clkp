@@ -8,8 +8,8 @@ repository = "https://git.corbet.ch/corbet-foss/clkp.git"
 license = "LGPL-3.0-only WITH LGPL-3.0-linking-exception"
 
 [dependencies]
-cgrd = { git = "https://git.corbet.ch/corbet-foss/cgrd.git", branch = "v01", default-features = false }
-cshm = { git = "https://git.corbet.ch/corbet-foss/cshm.git", branch = "v01" }
+cgrd = { git = "https://git.corbet.ch/corbet-foss/cgrd", branch = "main", default-features = false }
+cshm = { git = "https://git.corbet.ch/corbet-foss/cshm", branch = "main" }
 serde_json = "1"
 sha2 = "0.11"
 data-encoding = "2"
@@ -24,7 +24,7 @@ cpfl = { git = "https://git.corbet.ch/corbet-foss/cpfl.git", branch = "v01" }
 cchr = { git = "https://git.corbet.ch/corbet-foss/cchr.git", branch = "v01" }
 ckmg = { git = "https://git.corbet.ch/corbet-foss/ckmg.git", branch = "v01" }
 cwst = { git = "https://git.corbet.ch/corbet-foss/cwst.git", branch = "v01" }
-csgn = { git = "https://git.corbet.ch/corbet-foss/csgn.git", branch = "v01", default-features = false, features = ["volatile-signer"] }
+csgn = { git = "https://git.corbet.ch/corbet-foss/csgn", branch = "main", default-features = false, features = ["volatile-signer"] }
 cvlk = { git = "https://git.corbet.ch/corbet-foss/cvlk.git", branch = "v01" }
 ed25519-dalek = { version = "3", default-features = false, features = ["fast"] }
 redis = { version = "1", default-features = false, features = ["tokio-comp", "script"] }

@@ -23,9 +23,10 @@ check all144 ordered pairs; same-member pairs refuse, as required by Guard.
 G1 credential/Guard checks belong to `cgrd::check_published`, referenced through
 Charter and Assurance. Envoy (`cnvy`) fetches/follows feeds; it does not verify
 authority. Current Profile device authority and per-request possession must be composed
-with those owner checks. Public records and punishment are disabled in the MVP
-per the reviewed 2026-10-02 decision; no record-currentness proof is required. No second verifier
-or optional check is introduced here.
+with those owner checks. Complete Forum admission additionally requires the
+current epoch record/minimum-frontier relation. Gather supplies the genuine
+accounting owner; Lookup's original G1/device methods alone do not establish it.
+Lookup never imports accounting business logic or constructs its evidence.
 
 The polling successor adds an opaque `Matches.watch` cursor for ONE bounded
 candidate window. `watch(WatchRequest)` returns changed publications, removed
@@ -40,3 +41,37 @@ requester revision, schema, policy or generation changes require reset. Removals
 mean leaving that displayed window, not a claim that the member left the service.
 Memory/Valkey tests now include unchanged/add/update/remove, foreign cursor and
 heartbeat reset. These successor vectors are written, not executed.
+
+`page_with`, `watch_with` and `ciphertext_with` require a caller-owned concrete
+`AssociatedEvidence` implementation. Gather supplies its native accounting owner;
+no request chooses that implementation. Missing candidate evidence is omitted
+before seen state or output is built, while missing requester evidence refuses.
+Actual owner capabilities remain held through all awaits and the final atomic
+presence cut. The owner rechecks both its authority and the exact row's exclusive
+deadline at that cut. Every retained capability shortens cursor expiry. The
+checked cursor query domain differs from the original G1-only domain, preventing
+old observations from becoming complete-admission observations or removals.
+The original opaque storage continuation still advances over bounded scanned
+nonmatches; it conveys no match count or admission authority. Only checked
+selected IDs enter watch observations. No accepting default verifier is supplied.
+
+## Associated-owner boundary tests
+
+The associated test child uses actual csgn signatures and the maintained
+KeyRing verifier over auxiliary fixture publications identifying the exact
+committed Switchboard Binding and revision. Its retained evidence contains the
+owner-verified publication, original signed bytes and row deadline; it rechecks
+signature currentness, its clock floor and exclusive row expiry after awaits.
+This private test format qualifies the generic owner boundary only. It is not
+accounting evidence, a native proof substitute or complete Forum admission.
+
+The genuine G1/profile/device setup remains unchanged except for required current
+Credential purpose/action fields. Tests keep legacy and associated page/watch
+cursor domains separate, omit bad/missing/expired candidate evidence before
+entries or seen state, bind observation expiry to retained evidence, and ensure
+later removal cannot introduce a never-observed candidate. A real Memory Store
+wrapper advances the auxiliary owner's clock after each actual store operation
+in page, watch and ciphertext reads; signature expiry and exact row expiry while
+signatures remain valid each refuse the composed return. These source scenarios
+have not been executed. Concrete native accounting composition belongs to
+Gather's separate owner integration tests.
