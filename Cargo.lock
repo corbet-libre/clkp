@@ -538,7 +538,7 @@ checksum = "f079e83a288787bcd14a6aea84cee5c87a67c5a3e660c30f557a3d24761b3527"
 [[package]]
 name = "cgrd"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/cgrd?branch=main#6ed9485f32e55cd3efc78f36bbad1e4678989688"
+source = "git+https://git.corbet.ch/corbet-foss/cgrd?branch=main#fabf73fadd927817754b1d2c7d4808a0a9e5a5a2"
 dependencies = [
  "bigdecimal",
  "cpns",
@@ -714,7 +714,7 @@ checksum = "0c9ea0ac24bc397ab3c98583a3c9ba74fa56b09a4449bbe172b9b1ddb016027a"
 [[package]]
 name = "cnvl"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/cnvl.git?branch=main#c59b635ef17d2c2420b03e297acd38893db3a4ee"
+source = "git+https://git.corbet.ch/corbet-foss/cnvl.git?branch=main#c189819ab8b5a2ca0385afa20fc4ab8f4f5f43fe"
 dependencies = [
  "cgrd",
  "chacha20poly1305",
@@ -966,7 +966,7 @@ dependencies = [
 [[package]]
 name = "cswb"
 version = "0.1.0"
-source = "git+https://git.corbet.ch/corbet-foss/cswb.git?branch=main#bfeb62048ced7b5553b20fd6084e46e55797d651"
+source = "git+https://git.corbet.ch/corbet-foss/cswb.git?branch=main#667b86a9d7ead3c56a4720fbb11adb0f1095095f"
 dependencies = [
  "cchr",
  "cmmr",
