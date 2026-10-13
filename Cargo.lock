@@ -515,7 +515,7 @@ dependencies = [
 [[package]]
 name = "ckmg"
 version = "0.0.0"
-source = "git+https://git.corbet.ch/corbet-foss/ckmg.git?branch=v01#a88b04de61e3272b1a4dcaf711bba7788b25e037"
+source = "git+https://git.corbet.ch/corbet-foss/ckmg.git?branch=v01#ec22c5d74487eae685ec835a7c970d52b29aa487"
 dependencies = [
  "blake3",
  "cdht",
