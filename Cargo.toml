@@ -20,8 +20,8 @@ serde = { version = "1", features = ["derive"] }
 [dev-dependencies]
 cnvl = { git = "https://git.corbet.ch/corbet-foss/cnvl.git", branch = "v01" }
 tokio = { version = "1", features = ["rt", "macros"] }
-cpfl = { git = "https://git.corbet.ch/corbet-foss/cpfl.git", branch = "v01" }
-cchr = { git = "https://git.corbet.ch/corbet-foss/cchr.git", branch = "v01" }
+cpfl = { git = "https://git.corbet.ch/corbet-foss/cpfl.git", branch = "main" }
+cchr = { git = "https://git.corbet.ch/corbet-foss/cchr.git", branch = "main" }
 ckmg = { git = "https://git.corbet.ch/corbet-foss/ckmg.git", branch = "v01" }
 cwst = { git = "https://git.corbet.ch/corbet-foss/cwst.git", branch = "v01" }
 csgn = { git = "https://git.corbet.ch/corbet-foss/csgn", branch = "main", default-features = false, features = ["volatile-signer"] }
