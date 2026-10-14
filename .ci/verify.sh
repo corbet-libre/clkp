@@ -15,6 +15,7 @@ python3 .github/check-first-party.py
 rustc --version
 rustc --version
 # fmt patch gate (hosted: fmt; diff > patch; fail on non-empty)
+bash .ci/update-our-crates.sh
 cargo fmt --all
 git diff -- '*.rs' > "$ARTIFACT_ROOT/formatting.patch"
 test ! -s "$ARTIFACT_ROOT/formatting.patch"
