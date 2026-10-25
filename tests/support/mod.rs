@@ -177,7 +177,6 @@ impl Fixture {
         Verification {
             charter: self.charter.current(self.now).unwrap(),
             action: ACTION,
-            maximum_snapshot_age: 300,
         }
     }
     pub fn revoke(&mut self, member: &str) {
