@@ -72,7 +72,7 @@ async fn at_await(operation: u8, trigger: u64, row_expiry: bool) -> u64 {
         count: AtomicU64::new(0),
         trigger: AtomicU64::new(0),
         clock: owner_clock.clone(),
-        advance_to: (now + if row_expiry { 10 } else { 3 }) * 1000,
+        advance_to: (now + if row_expiry { 61 } else { 3 }) * 1000,
     });
     let real = Arc::new(
         cmmr::Memory::new(
@@ -99,7 +99,7 @@ async fn at_await(operation: u8, trigger: u64, row_expiry: bool) -> u64 {
         &mut alice,
         &["alice", "bob"],
         owner_clock,
-        if row_expiry { 30 } else { 3 },
+        if row_expiry { 120 } else { 3 },
     )
     .await;
     let watch = lookup

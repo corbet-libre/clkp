@@ -75,7 +75,7 @@ where
         Random,
         "garden".into(),
         cswb::Limits {
-            lease_ms: 10_000,
+            lease_ms: 60_000,
             publication_bytes: cpfl::MAX_PROFILE_BYTES,
             ciphertext_bytes: cpfl::MAX_PROFILE_BYTES,
         },

@@ -126,7 +126,7 @@ async fn round_trip<S: Store, C: Clock + Clone>(store: Arc<S>, clock: C, now: u6
         Random,
         "garden".into(),
         cswb::Limits {
-            lease_ms: 10000,
+            lease_ms: 60_000,
             publication_bytes: cpfl::MAX_PROFILE_BYTES,
             ciphertext_bytes: cpfl::MAX_PROFILE_BYTES,
         },
@@ -558,6 +558,10 @@ impl Clock for Wall {
 }
 #[tokio::test]
 async fn committed_valkey_pages_and_immediate_invalidation() {
+    if std::env::var_os("VALKEY_URL").is_none() {
+        eprintln!("skipped: VALKEY_URL is required (disposable Valkey)");
+        return;
+    }
     let now = Wall.now().unwrap() / 1000;
     let connection =
         redis::Client::open(std::env::var("VALKEY_URL").expect("disposable Valkey required"))
