@@ -149,10 +149,26 @@ async fn round_trip<S: Store, C: Clock + Clone>(store: Arc<S>, clock: C, now: u6
     let (c, cl) = enter(&board, &mut carol).await;
     let ac = current(&board, &a, &mut alice, 1).await;
     let bc = current(&board, &b, &mut bob, 2).await;
-    let first = lookup
+    // Pages follow the hashed attendance keys, never member names. With the
+    // fixtures' shared device key the rows sort carol < axel < alice < bob;
+    // axel enters later, inside alice's own window.
+    let key = |member: &str| cswb::attendance_key(member, &alice.device.verifying_key().to_bytes());
+    assert!(key("carol") < key("axel") && key("axel") < key("alice") && key("alice") < key("bob"));
+    let before = lookup
         .page(
             &board,
             request(&a, &ac, None, 1),
+            &alice.verification(),
+            &clean,
+        )
+        .await
+        .unwrap();
+    assert_eq!(before.entries.len(), 1);
+    assert_eq!(before.entries[0].member, "carol");
+    let first = lookup
+        .page(
+            &board,
+            request(&a, &ac, before.next.as_ref(), 1),
             &alice.verification(),
             &clean,
         )
@@ -186,8 +202,8 @@ async fn round_trip<S: Store, C: Clock + Clone>(store: Arc<S>, clock: C, now: u6
         .await
         .unwrap();
     assert!(unchanged.upserts.is_empty() && unchanged.removed.is_empty());
-    let mut aaron = Fixture::new("aaron", 1, now).await;
-    let (temporary, _) = enter(&board, &mut aaron).await;
+    let mut axel = Fixture::new("axel", 1, now).await;
+    let (temporary, _) = enter(&board, &mut axel).await;
     let added = lookup
         .watch(
             &board,
@@ -203,7 +219,7 @@ async fn round_trip<S: Store, C: Clock + Clone>(store: Arc<S>, clock: C, now: u6
         .unwrap();
     assert!(added.removed.is_empty());
     assert_eq!(added.upserts.len(), 1);
-    assert_eq!(added.upserts[0].member, "aaron");
+    assert_eq!(added.upserts[0].member, "axel");
     board.depart(&temporary).await.unwrap();
     let left = lookup
         .watch(
@@ -219,7 +235,7 @@ async fn round_trip<S: Store, C: Clock + Clone>(store: Arc<S>, clock: C, now: u6
         .await
         .unwrap();
     assert!(left.upserts.is_empty());
-    assert_eq!(left.removed, ["aaron"]);
+    assert_eq!(left.removed, ["axel"]);
     assert!(matches!(
         lookup
             .watch(
@@ -544,6 +560,83 @@ async fn committed_memory_pages_and_immediate_invalidation() {
         .unwrap(),
     );
     round_trip(store, clock, now).await;
+}
+
+/// Keyset pages over hashed row keys are deterministic and stable across
+/// fetches: one member with two device rows on two pages is listed exactly
+/// once, nobody is missing, and a second walk returns the same sequence.
+#[tokio::test]
+async fn pages_are_stable_and_count_a_multi_device_member_once() {
+    let now = 2_000_000_000;
+    let clock = Time(Arc::new(AtomicU64::new(now * 1000)));
+    let store = Arc::new(
+        cmmr::Memory::new(
+            cmmr::Scope::new("garden", "lookup").unwrap(),
+            limits(),
+            clock.clone(),
+        )
+        .unwrap(),
+    );
+    let board = Switchboard::new(
+        store.clone(),
+        clock,
+        Random,
+        "garden".into(),
+        cswb::Limits {
+            lease_ms: 60_000,
+            publication_bytes: cpfl::MAX_PROFILE_BYTES,
+            ciphertext_bytes: cpfl::MAX_PROFILE_BYTES,
+        },
+    )
+    .unwrap();
+    let lookup = Lookup::new(
+        store.clone(),
+        Random,
+        LookupLimits {
+            candidates: 3,
+            publication_bytes: cpfl::MAX_PROFILE_BYTES * 3,
+        },
+    )
+    .unwrap();
+    let mut alice = Fixture::new("alice", 1, now).await;
+    let mut phone = Fixture::with_device("bob", 1, now, vec![], 13).await;
+    let mut laptop = Fixture::with_device("bob", 1, now, vec![], 14).await;
+    let mut carol = Fixture::new("carol", 1, now).await;
+    let (a, _al) = enter(&board, &mut alice).await;
+    let _phone = enter(&board, &mut phone).await;
+    let _laptop = enter(&board, &mut laptop).await;
+    let _carol = enter(&board, &mut carol).await;
+    let ac = current(&board, &a, &mut alice, 1).await;
+    let mut walks = Vec::new();
+    for _ in 0..2 {
+        let mut seen = Vec::new();
+        let mut cursor: Option<Cursor> = None;
+        let mut pages = 0;
+        loop {
+            let page = lookup
+                .page(
+                    &board,
+                    request(&a, &ac, cursor.as_ref(), 1),
+                    &alice.verification(),
+                    &clean,
+                )
+                .await
+                .unwrap();
+            pages += 1;
+            seen.extend(page.entries.into_iter().map(|entry| entry.member));
+            match page.next {
+                Some(next) => cursor = Some(next),
+                None => break,
+            }
+        }
+        // Four rows, one per page (an empty last page may close the walk).
+        assert!(pages >= 4);
+        walks.push(seen);
+    }
+    assert_eq!(walks[0], walks[1]);
+    let mut members = walks[0].clone();
+    members.sort();
+    assert_eq!(members, ["bob", "carol"]);
 }
 
 #[derive(Clone)]

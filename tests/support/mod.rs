@@ -77,6 +77,17 @@ impl Fixture {
         Self::with_rules(member, revision, now, vec![]).await
     }
     pub async fn with_rules(member: &str, revision: u64, now: u64, rules: Vec<cgrd::Rule>) -> Self {
+        Self::with_device(member, revision, now, rules, 13).await
+    }
+    /// A fixture whose device key is derived from `seed`; one member may hold
+    /// several devices, each with its own presence row.
+    pub async fn with_device(
+        member: &str,
+        revision: u64,
+        now: u64,
+        rules: Vec<cgrd::Rule>,
+        seed: u8,
+    ) -> Self {
         let mut issuer = issuer(now);
         let mut charter = cchr::Charter::new(cchr::Configuration {
             origin: "https://identity.example.test".into(),
@@ -92,7 +103,7 @@ impl Fixture {
                 now,
             )
             .unwrap();
-        let mut device = Device(SigningKey::from_bytes(&[13; 32]));
+        let mut device = Device(SigningKey::from_bytes(&[seed; 32]));
         let credential = sign(
             &mut issuer,
             Kind::Credential,

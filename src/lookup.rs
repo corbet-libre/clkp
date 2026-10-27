@@ -165,28 +165,40 @@ impl<S: Store, R: Tokens> Lookup<S, R> {
             )
             .await?;
         evidence.current()?;
-        // One member counts once no matter how many device rows it holds:
-        // keep the freshest verified profile revision per member before any
-        // reciprocal check, byte budget or atomic cut.
-        let mut freshest: Vec<&VerifiedPresence> = Vec::new();
+        // One member counts once no matter how many device rows it holds, and
+        // on exactly one page: the page holding its lowest-keyed live row. That
+        // keeps keyset pages free of duplicates and gaps although one member's
+        // rows scatter across the hashed key space. The freshest verified
+        // profile revision over all its live rows answers.
+        let mut members: Vec<&str> = Vec::new();
         for row in &page.candidates {
-            match freshest
-                .iter_mut()
-                .find(|slot| slot.binding().member == row.binding().member)
-            {
-                Some(slot)
-                    if row.profile().transcript().revision
-                        > slot.profile().transcript().revision =>
-                {
-                    *slot = row;
-                }
-                Some(_) => {}
-                None => freshest.push(row),
+            if !members.contains(&row.binding().member.as_str()) {
+                members.push(&row.binding().member);
             }
         }
+        let mut owned = Vec::new();
+        for member in members {
+            let rows = board
+                .member_rows(
+                    request.session,
+                    request.current,
+                    member,
+                    verification,
+                    contact,
+                )
+                .await?;
+            let Some(first) = rows.first() else { continue };
+            if !page.candidates.iter().any(|row| row.key() == first.key()) {
+                continue;
+            }
+            if let Some(row) = cswb::freshest(rows) {
+                owned.push(row);
+            }
+        }
+        evidence.current()?;
         let mut selected = Vec::new();
         let mut remaining = self.limits.publication_bytes;
-        for row in freshest {
+        for row in &owned {
             if cgrd::matches(
                 requester.profile().participant(),
                 row.profile().participant(),
