@@ -165,9 +165,28 @@ impl<S: Store, R: Tokens> Lookup<S, R> {
             )
             .await?;
         evidence.current()?;
+        // One member counts once no matter how many device rows it holds:
+        // keep the freshest verified profile revision per member before any
+        // reciprocal check, byte budget or atomic cut.
+        let mut freshest: Vec<&VerifiedPresence> = Vec::new();
+        for row in &page.candidates {
+            match freshest
+                .iter_mut()
+                .find(|slot| slot.binding().member == row.binding().member)
+            {
+                Some(slot)
+                    if row.profile().transcript().revision
+                        > slot.profile().transcript().revision =>
+                {
+                    *slot = row;
+                }
+                Some(_) => {}
+                None => freshest.push(row),
+            }
+        }
         let mut selected = Vec::new();
         let mut remaining = self.limits.publication_bytes;
-        for row in &page.candidates {
+        for row in freshest {
             if cgrd::matches(
                 requester.profile().participant(),
                 row.profile().participant(),
