@@ -639,6 +639,121 @@ async fn pages_are_stable_and_count_a_multi_device_member_once() {
     assert_eq!(members, ["bob", "carol"]);
 }
 
+/// P8b: a member is hidden only when every live device row reports a full
+/// Wave budget (absent = visible), and the firewall runs one way: the
+/// searcher must pass the member's rules, while the searcher's own criteria
+/// never hide anyone on the server.
+#[tokio::test]
+async fn full_budget_hides_and_the_firewall_runs_one_way() {
+    let now = 2_000_000_000;
+    let clock = Time(Arc::new(AtomicU64::new(now * 1000)));
+    let store = Arc::new(
+        cmmr::Memory::new(
+            cmmr::Scope::new("garden", "lookup").unwrap(),
+            limits(),
+            clock.clone(),
+        )
+        .unwrap(),
+    );
+    let board = Switchboard::new(
+        store.clone(),
+        clock,
+        Random,
+        "garden".into(),
+        cswb::Limits {
+            lease_ms: 60_000,
+            publication_bytes: cpfl::MAX_PROFILE_BYTES,
+            ciphertext_bytes: cpfl::MAX_PROFILE_BYTES,
+        },
+    )
+    .unwrap();
+    let lookup = Lookup::new(
+        store.clone(),
+        Random,
+        LookupLimits {
+            candidates: 3,
+            publication_bytes: cpfl::MAX_PROFILE_BYTES * 3,
+        },
+    )
+    .unwrap();
+    // alice's own criterion excludes carol; dave's firewall excludes alice.
+    let block = |member: &str| cgrd::Rule::Block {
+        member: member.into(),
+    };
+    let mut alice = Fixture::with_rules("alice", 1, now, vec![block("carol")]).await;
+    let mut phone = Fixture::with_device("bob", 1, now, vec![], 13).await;
+    let mut laptop = Fixture::with_device("bob", 1, now, vec![], 14).await;
+    let mut carol = Fixture::new("carol", 1, now).await;
+    let mut dave = Fixture::with_rules("dave", 1, now, vec![block("alice")]).await;
+    let (a, _) = enter(&board, &mut alice).await;
+    let (p, mut pl) = enter(&board, &mut phone).await;
+    let (l, mut ll) = enter(&board, &mut laptop).await;
+    let _carol = enter(&board, &mut carol).await;
+    let _dave = enter(&board, &mut dave).await;
+    let ac = current(&board, &a, &mut alice, 1).await;
+    let pc = current(&board, &p, &mut phone, 2).await;
+    let lc = current(&board, &l, &mut laptop, 3).await;
+    let mut listed = async |alice: &mut Fixture| {
+        let mut seen = Vec::new();
+        let mut cursor: Option<Cursor> = None;
+        loop {
+            let page = lookup
+                .page(
+                    &board,
+                    request(&a, &ac, cursor.as_ref(), 3),
+                    &alice.verification(),
+                    &clean,
+                )
+                .await
+                .unwrap();
+            seen.extend(page.entries.into_iter().map(|entry| entry.member));
+            match page.next {
+                Some(next) => cursor = Some(next),
+                None => break,
+            }
+        }
+        seen.sort();
+        seen
+    };
+    // Absent flags: visible. dave's firewall hides him; carol fails only
+    // alice's own criterion and is still delivered (the client filters).
+    assert_eq!(listed(&mut alice).await, ["bob", "carol"]);
+    // One full device while the other never reported: still visible.
+    pl = board
+        .heartbeat_with(&p, &pc, pl.revision, Some(false))
+        .await
+        .unwrap();
+    assert_eq!(listed(&mut alice).await, ["bob", "carol"]);
+    // One full and one not full: visible.
+    ll = board
+        .heartbeat_with(&l, &lc, ll.revision, Some(true))
+        .await
+        .unwrap();
+    assert_eq!(listed(&mut alice).await, ["bob", "carol"]);
+    // Every live row full: hidden from pages and from direct ciphertext reads.
+    ll = board
+        .heartbeat_with(&l, &lc, ll.revision, Some(false))
+        .await
+        .unwrap();
+    assert_eq!(listed(&mut alice).await, ["carol"]);
+    assert!(matches!(
+        lookup
+            .ciphertext(
+                &board,
+                request(&a, &ac, None, 1),
+                ("bob", 1),
+                &alice.verification(),
+                &clean
+            )
+            .await,
+        Err(LookupError::Presence(cswb::Error::Absent))
+    ));
+    // A plain heartbeat clears the hint (unknown): visible again.
+    board.heartbeat(&p, &pc, pl.revision).await.unwrap();
+    assert_eq!(listed(&mut alice).await, ["bob", "carol"]);
+    let _ = ll;
+}
+
 #[derive(Clone)]
 struct Wall;
 impl Clock for Wall {

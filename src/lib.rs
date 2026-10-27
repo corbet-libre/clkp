@@ -112,6 +112,17 @@ impl Projection {
     }
 }
 
+/// The one-directional search firewall: the searcher must pass the MEMBER's
+/// rules and every pair-level check (schema, self-pair). The searcher's own
+/// criteria (failures owned by side A) never hide anyone on the server; they
+/// stay a client-side search filter.
+pub fn admits(searcher: &cgrd::Participant, member: &cgrd::Participant) -> bool {
+    cgrd::matches(searcher, member)
+        .failures
+        .iter()
+        .all(|failure| failure.owner == Some(cgrd::Side::A))
+}
+
 fn decimal(value: &Value) -> Result<String, RuleError> {
     Ok(cshm::parse_number(&value.to_string())
         .map_err(|_| RuleError::Type)?

@@ -191,6 +191,10 @@ impl<S: Store, R: Tokens> Lookup<S, R> {
             if !page.candidates.iter().any(|row| row.key() == first.key()) {
                 continue;
             }
+            // Hidden only when every live device row reports a full budget.
+            if !cswb::findable(&rows) {
+                continue;
+            }
             if let Some(row) = cswb::freshest(rows) {
                 owned.push(row);
             }
@@ -199,12 +203,10 @@ impl<S: Store, R: Tokens> Lookup<S, R> {
         let mut selected = Vec::new();
         let mut remaining = self.limits.publication_bytes;
         for row in &owned {
-            if cgrd::matches(
+            if crate::admits(
                 requester.profile().participant(),
                 row.profile().participant(),
-            )
-            .is_match()
-            {
+            ) {
                 if !evidence.include(row)? {
                     continue;
                 }
@@ -368,8 +370,8 @@ impl<S: Store, R: Tokens> Lookup<S, R> {
             .requester(request.session, request.current, verification, contact)
             .await?;
         evidence.require(&requester)?;
-        let candidate = board
-            .candidate(
+        let rows = board
+            .member_rows(
                 request.session,
                 request.current,
                 member,
@@ -377,14 +379,19 @@ impl<S: Store, R: Tokens> Lookup<S, R> {
                 contact,
             )
             .await?;
+        // A member whose every live row reports a full budget is not findable,
+        // exactly like an absent one.
+        if !cswb::findable(&rows) {
+            return Err(cswb::Error::Absent.into());
+        }
+        let candidate = cswb::freshest(rows).ok_or(cswb::Error::Absent)?;
         evidence.current()?;
         evidence.require(&candidate)?;
         if candidate.profile().transcript().revision != revision
-            || !cgrd::matches(
+            || !crate::admits(
                 requester.profile().participant(),
                 candidate.profile().participant(),
             )
-            .is_match()
         {
             return Err(LookupError::ResetRequired);
         }
