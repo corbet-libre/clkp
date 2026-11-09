@@ -693,7 +693,7 @@ async fn full_budget_hides_and_the_firewall_runs_one_way() {
     let ac = current(&board, &a, &mut alice, 1).await;
     let pc = current(&board, &p, &mut phone, 2).await;
     let lc = current(&board, &l, &mut laptop, 3).await;
-    let mut listed = async |alice: &mut Fixture| {
+    let listed = async |alice: &mut Fixture| {
         let mut seen = Vec::new();
         let mut cursor: Option<Cursor> = None;
         loop {

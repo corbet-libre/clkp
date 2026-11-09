@@ -65,10 +65,10 @@ impl AssociatedEvidence for SignedOwner {
 fn cursor_record(cursor: &Cursor) -> String {
     format!("lkp_{}", data_encoding::HEXLOWER.encode(&cursor.0))
 }
-fn setup<S: Store>(store: S, clock: Time) -> (Switchboard<S, Time, Random>, Lookup<S, Random>)
-where
-    S: Clone,
-{
+fn setup<S: Store + Clone>(
+    store: S,
+    clock: Time,
+) -> (Switchboard<S, Time, Random>, Lookup<S, Random>) {
     let board = Switchboard::new(
         store.clone(),
         clock,
