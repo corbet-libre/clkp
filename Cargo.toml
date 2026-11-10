@@ -23,8 +23,8 @@ tokio = { version = "1", features = ["rt", "macros"] }
 cpfl = { git = "https://git.corbet.ch/corbet-libre/cpfl.git", branch = "main" }
 cchr = { git = "https://git.corbet.ch/corbet-libre/cchr.git", branch = "main" }
 ckmg = { git = "https://git.corbet.ch/corbet-libre/ckmg.git", branch = "main" }
-cwst = { git = "https://git.corbet.ch/corbet-foss/cwst.git", branch = "main" }
+cwst = { git = "https://git.corbet.ch/corbet-libre/cwst.git", branch = "main" }
 csgn = { git = "https://git.corbet.ch/corbet-libre/csgn.git", branch = "main", default-features = false, features = ["volatile-signer"] }
-cvlk = { git = "https://git.corbet.ch/corbet-foss/cvlk.git", branch = "main" }
+cvlk = { git = "https://git.corbet.ch/corbet-libre/cvlk.git", branch = "main" }
 ed25519-dalek = { version = "3", default-features = false, features = ["fast"] }
 redis = { version = "1", default-features = false, features = ["tokio-comp", "script"] }
