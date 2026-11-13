@@ -6,7 +6,14 @@ project = "clkp"
 # excluded per prior-cohort rule; registry/live reads stay FRESH outside cache).
 [checks.verify]
 kind = "commands"
-commands = [["bash", ".ci/verify.sh"]]
+fleet = true
+commands = [
+  ["ccid", "first-party"],
+  ["cargo", "fmt", "--all", "--check"],
+  ["cargo", "clippy", "--locked", "--all-targets", "--", "-D", "warnings"],
+  ["cargo", "test", "--locked", "--all-targets"],
+  ["ccid", "coverage", "run"],
+]
 cache_tools = [["rustc", "-vV"], ["cargo", "--version"], ["python3", "--version"], ["rustup", "run", "nightly", "rustc", "-vV"], ["rustup", "run", "nightly", "cargo", "llvm-cov", "--version"]]
 cache_outputs = ["coverage.json", "coverage.lcov", "coverage.txt"]
 
@@ -37,3 +44,5 @@ command = ["bash", ".ci/run-cached.sh"]
 
 [security]
 dependencies = "cargo-deny"
+
+[coverage]

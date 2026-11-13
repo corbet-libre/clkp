@@ -13,8 +13,6 @@ jobs:
       with:
         ref: ${{ github.event.pull_request.head.sha || github.sha }}
         persist-credentials: false
-    - name: Validate the committed dependency graph
-      run: python3 .github/check-first-party.py
     - uses: dtolnay/rust-toolchain@stable
     - name: Resolve one fresh dependency snapshot
       run: 'cargo update
@@ -77,7 +75,6 @@ jobs:
     - uses: actions/download-artifact@v8
       with:
         name: resolved-lock
-    - run: python3 .github/check-first-party.py
     - uses: taiki-e/install-action@83ac0ad63c0167e6f06796fab0fce28db1bf3db0
       with:
         tool: cargo-deny
@@ -119,8 +116,6 @@ jobs:
         coverage.lcov
     - name: Export companion source line inventory
       run: cargo llvm-cov report --locked --branch --ignore-filename-regex '/tests/' --text > coverage.txt
-    - name: Require complete line and branch coverage
-      run: python3 .github/check-coverage.py coverage.lcov coverage.json coverage.txt
     - uses: actions/upload-artifact@v7
       if: always()
       with:
