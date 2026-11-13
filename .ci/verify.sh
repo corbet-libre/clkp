@@ -21,7 +21,12 @@ test ! -s "$ARTIFACT_ROOT/formatting.patch"
 cargo clippy --locked --all-targets -- -D warnings
 cargo test --locked --all-targets
 rustup run nightly rustc --version
+NIGHTLY_RUSTC="$(rustup which --toolchain nightly rustc)"
 NIGHTLY_CARGO="$(rustup which --toolchain nightly cargo)"
+export RUSTC="$NIGHTLY_RUSTC"
+export CARGO="$NIGHTLY_CARGO"
+export PATH="$(dirname "$NIGHTLY_RUSTC"):$PATH"
+export RUSTUP_TOOLCHAIN=nightly
 "$NIGHTLY_CARGO" llvm-cov --version
 "$NIGHTLY_CARGO" llvm-cov --locked --workspace --all-features --branch --no-cfg-coverage --no-cfg-coverage-nightly --json --output-path coverage.json
 "$NIGHTLY_CARGO" llvm-cov report --locked --branch --ignore-filename-regex '/tests/' --lcov --output-path coverage.lcov
