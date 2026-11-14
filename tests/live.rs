@@ -793,5 +793,8 @@ async fn committed_valkey_pages_and_immediate_invalidation() {
     round_trip(store, Wall, now).await;
 }
 
+#[path = "live/forged.rs"]
+mod forged;
+
 #[path = "live/associated.rs"]
 mod associated;

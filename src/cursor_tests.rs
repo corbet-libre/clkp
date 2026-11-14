@@ -240,3 +240,37 @@ async fn deleting_generation_a_preserves_generation_b_without_renewal() {
         Err(CursorError::ResetRequired)
     ));
 }
+#[tokio::test]
+async fn watch_and_resume_refuse_each_others_cursors() {
+    let (cursors, _) = setup();
+    let page = cursors
+        .issue(context(), "position".into(), Deadline::new(200).unwrap())
+        .await
+        .unwrap();
+    assert!(matches!(
+        cursors.watch(&page).await,
+        Err(CursorError::ResetRequired)
+    ));
+    let empty = cursors
+        .issue(context(), String::new(), Deadline::new(200).unwrap())
+        .await
+        .unwrap();
+    assert!(matches!(
+        cursors.watch(&empty).await,
+        Err(CursorError::ResetRequired)
+    ));
+    let window = Window {
+        start: None,
+        limit: 1,
+        seen: Vec::new(),
+    };
+    let watch = cursors
+        .issue_watch(context(), window, Deadline::new(200).unwrap())
+        .await
+        .unwrap();
+    assert!(cursors.watch(&watch).await.is_ok());
+    assert!(matches!(
+        cursors.resume(&watch, &context()).await,
+        Err(CursorError::ResetRequired)
+    ));
+}

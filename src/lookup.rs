@@ -187,17 +187,18 @@ impl<S: Store, R: Tokens> Lookup<S, R> {
                     contact,
                 )
                 .await?;
-            let Some(first) = rows.first() else { continue };
-            if !page.candidates.iter().any(|row| row.key() == first.key()) {
+            // No live row (all expired meanwhile) or a lowest-keyed row on
+            // another page: this page does not own the member.
+            let first = rows.first().map(|row| row.key());
+            if !page.candidates.iter().any(|row| Some(row.key()) == first) {
                 continue;
             }
             // Hidden only when every live device row reports a full budget.
             if !cswb::findable(&rows) {
                 continue;
             }
-            if let Some(row) = cswb::freshest(rows) {
-                owned.push(row);
-            }
+            // `rows` is non-empty here (a first row matched), so this adds one row.
+            owned.extend(cswb::freshest(rows));
         }
         evidence.current()?;
         let mut selected = Vec::new();

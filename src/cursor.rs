@@ -137,13 +137,16 @@ impl<S: Store, R: cswb::Tokens> Cursors<S, R> {
         }
         let cursor = Cursor(token);
         let generation = context.generation.clone();
+        // Saved is derived-Serialize plain data (strings, integers, byte arrays,
+        // options and vectors of the same, all string-keyed): serde_json cannot
+        // fail on it, so there is no error path to take.
         let value = serde_json::to_vec(&Saved {
             context,
             after,
             storage,
             watch,
         })
-        .map_err(|_| CursorError::Invalid)?;
+        .expect("a derived-Serialize plain-data record always serializes");
         self.store
             .compare_exchange(&[Write {
                 expected: None,
