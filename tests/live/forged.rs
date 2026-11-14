@@ -3,6 +3,9 @@
 use super::*;
 
 type Memory = cmmr::Memory<Time>;
+type Board = Switchboard<Arc<Memory>, Time, Random>;
+type Finder = Lookup<Arc<Memory>, Random>;
+type Edit = Box<dyn FnOnce(&mut serde_json::Value)>;
 
 fn memory(now: u64) -> (Time, Arc<Memory>) {
     let clock = Time(Arc::new(AtomicU64::new(now * 1000)));
@@ -19,13 +22,7 @@ fn memory(now: u64) -> (Time, Arc<Memory>) {
 fn record_key(cursor: &Cursor) -> String {
     format!("lkp_{}", data_encoding::HEXLOWER.encode(&cursor.0))
 }
-fn board_and_lookup(
-    store: &Arc<Memory>,
-    clock: &Time,
-) -> (
-    Switchboard<Arc<Memory>, Time, Random>,
-    Lookup<Arc<Memory>, Random>,
-) {
+fn board_and_lookup(store: &Arc<Memory>, clock: &Time) -> (Board, Finder) {
     let board = Switchboard::new(
         store.clone(),
         clock.clone(),
@@ -144,7 +141,7 @@ async fn forged_watch_windows_refuse_and_changed_rows_are_reported() {
     let mut members: Vec<_> = page.entries.iter().map(|e| e.member.as_str()).collect();
     members.sort();
     assert_eq!(members, ["bob", "carol"]);
-    let refused: [(u8, Box<dyn FnOnce(&mut serde_json::Value)>); 6] = [
+    let refused: [(u8, Edit); 6] = [
         (1, Box::new(|v| v["watch"]["limit"] = 0.into())),
         (2, Box::new(|v| v["watch"]["limit"] = 6.into())),
         (3, Box::new(|v| v["watch"]["limit"] = 1.into())),
@@ -180,7 +177,7 @@ async fn forged_watch_windows_refuse_and_changed_rows_are_reported() {
     }
     // A remembered row whose revision or digest no longer matches is reported
     // again instead of being treated as unchanged.
-    let edits: [(u8, Box<dyn FnOnce(&mut serde_json::Value)>); 2] = [
+    let edits: [(u8, Edit); 2] = [
         (
             7,
             Box::new(|v| {
